@@ -45,6 +45,6 @@ class Envir{
 		void setQa(unsigned int x, unsigned int y, double newValue);
 		void setQb(unsigned int x, unsigned int y, double newValue);
 		void setQc(unsigned int x, unsigned int y, double newValue);
-
+		void init(int W, int H, double percentageGA);
 };
 #endif // ENVIR_H

@@ -47,17 +47,18 @@ Envir::Envir(unsigned int W, unsigned int H, double D, double A_MAX){
 // =========================================================================
 //                              Public Methods
 // =========================================================================
-Envir::init(int W, int H, double percentageGA){
+void Envir::init(int W, int H, double percentageGA){
 	char* tmpTable= new char [W*H];
+	int x=0,y=0;
 	int count=0;
 	for (int i=0; i<W; i++)
 		for (int j=0; j<H; j++)
-			char[i*H + j]='0';
+			tmpTable[i*H + j]='0';
 	while (count < (W * H * percentageGA)){
 		x=rand()%W;
 		y=rand()%H;
 		if (tmpTable[x*H + y] == '0'){
-			indiv_[x*H + y]=Ecoli(x,y,'A');
+			indiv_[x*H + y]= &Ecoli(x,y,'A');
 			count++;
 		}
 	}
