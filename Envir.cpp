@@ -21,7 +21,7 @@ Envir::Envir(unsigned int W, unsigned int H, double D, double A_homo,
 	Qc_= new double[W*H];
 	F_= new double[W*H];
 	Ecoli** indiv= new Ecoli*[W*H];
-	unsigned int* reproduced= new unsigned int[W*H];
+	//unsigned int* reproduced= new unsigned int[W*H];
 	cout.precision(3);
 	for (unsigned int i=0;i<W;i++){
 		for (unsigned int j=0;j<H;j++){
@@ -30,13 +30,13 @@ Envir::Envir(unsigned int W, unsigned int H, double D, double A_homo,
 			Qb_[i*H + j] = 0;
 			Qc_[i*H + j] = 0;
 			F_[i*H + j] =0;
-			reproduced[i*H + j] = 0;
+			//reproduced[i*H + j] = 0;
 			indiv[i*H + j]=nullptr;
 		}
 		cout << endl;
 	}
 	D_=D;
-	reproduced_=reproduced;
+	//reproduced_=reproduced;
 	indiv_=indiv;
 	W_=W;
 	H_=H;
@@ -147,8 +147,17 @@ void Envir::diffuse(){
 
 void Envir::plsDie(double prob){
 	for (int x=0; x<(int)W_; x++)
-		for (int y=0; y<(int)H_; y++){
-			if ((double) rand()/RAND_MAX < prob)
+		for (int y=0; y<(int)H_; y++)
+			if ((double) rand()/RAND_MAX < prob){
+				Qa_[x*H_+y] += indiv_[x*H_+y]->getQa();
+				Qb_[x*H_+y] += indiv_[x*H_+y]->getQb();
+				Qc_[x*H_+y] += indiv_[x*H_+y]->getQc();
+				indiv_[x*H_+y]->setGeno('0');
+				indiv_[x*H_+y]->setQa(0);
+				indiv_[x*H_+y]->setQb(0);
+				indiv_[x*H_+y]->setQc(0);
+			}
+}		
 // =========================================================================
 //                                  Getters
 // =========================================================================
@@ -161,9 +170,9 @@ double Envir::getQb(unsigned int x, unsigned int y){
 double Envir::getQc(unsigned int x, unsigned int y){
 	return Qc_[x*H_ + y];
 }
-unsigned int Envir::getRep(unsigned int x, unsigned int y){
-	return reproduced_[x*H_ + y];
-}
+//unsigned int Envir::getRep(unsigned int x, unsigned int y){
+	//return reproduced_[x*H_ + y];
+//}
 Ecoli* Envir::getEcoli(unsigned int x, unsigned int y){
 	return indiv_[x*H_ + y];
 }

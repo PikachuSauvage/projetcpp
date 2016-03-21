@@ -41,6 +41,7 @@ class Ecoli{
 // =========================================================================
 //                                  Setters
 // =========================================================================
+		void setGeno(char c);
 		void setQa(double double_in);
 		void setQb(double double_in);
 		void setQc(double double_in);

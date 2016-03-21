@@ -49,6 +49,9 @@ double Ecoli::getQc(){
 // =========================================================================
 //                                  Setters
 // =========================================================================
+void Ecoli::setGeno(char c){
+	G_=c;
+}
 void Ecoli::setQa(double double_in){
 	Qa_=double_in;
 }

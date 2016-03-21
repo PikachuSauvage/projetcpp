@@ -15,7 +15,7 @@ class Envir{
 		double* Qc_;
 		double* F_;
 		Ecoli** indiv_;
-		unsigned int* reproduced_;
+		//unsigned int* reproduced_;
 		double D_;
 		double RAA_;
 		double RAB_;
@@ -47,7 +47,7 @@ class Envir{
 		double getQa(unsigned int x, unsigned int y);
 		double getQb(unsigned int x, unsigned int y);
 		double getQc(unsigned int x, unsigned int y);
-		unsigned int getRep(unsigned int x, unsigned int y);
+		//unsigned int getRep(unsigned int x, unsigned int y);
 		Ecoli* getEcoli(unsigned int x, unsigned int y);
 // =========================================================================
 //                                  Setters
