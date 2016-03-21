@@ -13,16 +13,23 @@ class Envir{
 		double* Qa_;
 		double* Qb_;
 		double* Qc_;
+		double* F_;
 		Ecoli** indiv_;
 		unsigned int* reproduced_;
 		double D_;
+		double RAA_;
+		double RAB_;
+		double RBB_;
+		double RBC_;
+		double Wmin_;
 		unsigned int W_;
 		unsigned int H_;
 	public:
 // =========================================================================
 //                               Constructors
 // =========================================================================
-		Envir(unsigned int W, unsigned int H, double D, double A_MAX);
+		Envir(unsigned int W, unsigned int H, double D, double A_homo,
+			  double RAA, double RAB, double RBB, double RBC, double Wmin);
 // ===========================================================================
 //                                 Destructor
 // ===========================================================================
@@ -30,7 +37,10 @@ class Envir{
 // =========================================================================
 //                              Public Methods
 // =========================================================================
-
+		void updateMetab();
+		void updateFitness();
+		void diffuse();
+		void plsDie(double prob);
 // =========================================================================
 //                                  Getters
 // =========================================================================

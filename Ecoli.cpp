@@ -34,7 +34,27 @@ Ecoli::~Ecoli(){}
 // =========================================================================
 //                                  Getters
 // =========================================================================
-
+char Ecoli::getGeno(){
+	return G_;
+}
+double Ecoli::getQa(){
+	return Qa_;
+}
+double Ecoli::getQb(){
+	return Qb_;
+}
+double Ecoli::getQc(){
+	return Qc_;
+}
 // =========================================================================
 //                                  Setters
 // =========================================================================
+void Ecoli::setQa(double double_in){
+	Qa_=double_in;
+}
+void Ecoli::setQb(double double_in){
+	Qb_=double_in;
+}
+void Ecoli::setQc(double double_in){
+	Qc_=double_in;
+}
