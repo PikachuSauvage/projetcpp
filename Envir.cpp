@@ -143,6 +143,12 @@ void Envir::diffuse(){
 			newQb[x*H_+y]-=9*D_*Qb_[x*H_ + y];
 			newQc[x*H_+y]-=9*D_*Qc_[x*H_ + y];
 		}
+	delete Qa_;
+	delete Qb_;
+	delete Qc_;
+	Qa_=newQa;
+	Qb_=newQb;
+	Qc_=newQc;
 }
 
 void Envir::plsDie(double prob){
@@ -157,7 +163,19 @@ void Envir::plsDie(double prob){
 				indiv_[x*H_+y]->setQb(0);
 				indiv_[x*H_+y]->setQc(0);
 			}
-}		
+}
+void Envir::survive(double prob){
+	for (int i=0;i<W_;i++)
+		for (int j=0;j<H_;j++){
+			if (indiv_[x*H_+y].getGeno() == '0'){
+				
+}
+void Envir::run(int TMAX){
+	for (int t=1; t<=TMAX; t++){
+		updateMetab();
+		plsDie();
+	}
+}
 // =========================================================================
 //                                  Getters
 // =========================================================================
