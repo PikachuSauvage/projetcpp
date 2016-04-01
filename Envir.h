@@ -5,6 +5,7 @@
 #define ENVIR_H
 
 #include "Ecoli.h"
+#include "vector"
 class Envir{
 // =========================================================================
 //                              Protected Methods

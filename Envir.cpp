@@ -164,11 +164,61 @@ void Envir::plsDie(double prob){
 				indiv_[x*H_+y]->setQc(0);
 			}
 }
-void Envir::survive(double prob){
+void Envir::toSurvive(){
+	vector<int> v;
+	int x=0;
+	int y=0;
+	double fitmax=-0.001;
+	int memmax;
 	for (int i=0;i<W_;i++)
 		for (int j=0;j<H_;j++){
 			if (indiv_[x*H_+y].getGeno() == '0'){
-				
+				v.insert(v.end(),x*H_+y);
+			}
+		}
+	cout<< "Vector contrains:";
+	for (std::vector<int>::iterator i=v.begin();i!=v.end();++i)
+		cout<<' '<< *i;
+	cout<< '\n';
+	std::random_shuffle(v.begin(),v.end());
+	for (std::vector<int>::iterator i=v.begin();i!=v.end();++i){
+		x=*i%H_;
+		y=*i-H_*x;
+		for (int i=-1; i<=1; i++)
+			for (int j=-1; j<=1; j++){
+				if ((x+i)<0)
+					m=i+H_;
+				if ((x+i)>= (int)H_)
+					m=i-H_;
+				if ((y+j)<0)
+					n=j+W_;
+				if ((y+j)>=(int)H_)
+					n=j-W_;
+				if (F_[m*H_+n] > fitmax){
+					memmax=m*H_+n;
+					fitmax=F_[m*H_+n];
+				}
+			}
+		if (indiv_[memmax]->getGeno()=='A'){
+			if ((double)random()/RAND_MAX >= proba){
+				indiv_[x*H_+y]->setGeno('A');
+			} else {
+				indiv_[x*H_+y]->setGeno('B');
+			}
+		} else {
+			if ((double)random()/RAND_MAX >= proba){
+				indiv_[x*H_+y]->setGeno('B');
+			} else {
+				indiv_[x*H_+y]->setGeno('A');
+			}
+		}
+		indiv_[memmax]->setQa(indiv_[memmax]->getQa()/2);
+		indiv_[memmax]->setQb(indiv_[memmax]->getQb()/2);
+		indiv_[memmax]->setQc(indiv_[memmax]->getQc()/2);
+		indiv_[x*H_+y]->setQa(indiv_[memmax]->getQa());
+		indiv_[x*H_+y]->setQb(indiv_[memmax]->getQb());	
+		indiv_[x*H_+y]->setQc(indiv_[memmax]->getQc());				
+	}
 }
 void Envir::run(int TMAX){
 	for (int t=1; t<=TMAX; t++){
