@@ -16,7 +16,7 @@ class Envir{
 		double* Qc_;
 		double* F_;
 		Ecoli** indiv_;
-		//unsigned int* reproduced_;
+		unsigned int* reproduced_;
 		double D_;
 		double RAA_;
 		double RAB_;
@@ -35,7 +35,7 @@ class Envir{
 // ===========================================================================
 //                                 Destructor
 // ===========================================================================
-
+		~Envir();
 // =========================================================================
 //                              Public Methods
 // =========================================================================
@@ -61,5 +61,6 @@ class Envir{
 		void setQb(unsigned int x, unsigned int y, double newValue);
 		void setQc(unsigned int x, unsigned int y, double newValue);
 		void init(int W, int H, double percentageGA);
+		void reinit();
 };
 #endif // ENVIR_H

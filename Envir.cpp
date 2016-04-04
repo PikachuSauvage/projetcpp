@@ -2,9 +2,11 @@
 //                                  Includes
 // ===========================================================================
 #include "Envir.h"
+#include <algorithm>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+
 using std::cout;
 using std::endl;
 // =========================================================================
@@ -21,7 +23,7 @@ Envir::Envir(unsigned int W, unsigned int H, double D, double A_homo,
 	Qc_= new double[W*H];
 	F_= new double[W*H];
 	Ecoli** indiv= new Ecoli*[W*H];
-	unsigned int* reproduced= new unsigned int[W*H];
+	reproduced_= new unsigned int[W*H];
 	cout.precision(3);
 	for (unsigned int i=0;i<W;i++){
 		for (unsigned int j=0;j<H;j++){
@@ -30,13 +32,12 @@ Envir::Envir(unsigned int W, unsigned int H, double D, double A_homo,
 			Qb_[i*H + j] = 0;
 			Qc_[i*H + j] = 0;
 			F_[i*H + j] =0;
-			reproduced[i*H + j] = 0;
+			reproduced_[i*H + j] = 0;
 			indiv[i*H + j]=nullptr;
 		}
 		cout << endl;
 	}
 	D_=D;
-	reproduced_=reproduced;
 	indiv_=indiv;
 	W_=W;
 	H_=H;
@@ -49,7 +50,23 @@ Envir::Envir(unsigned int W, unsigned int H, double D, double A_homo,
 // ======================================================================
 //                                 Destructor
 // =======================================================================
-
+Envir::~Envir(){
+	delete[] Qa_;
+	delete[] Qb_;
+	delete[] Qc_;
+	delete[] F_;
+	delete[] reproduced_;
+	for (unsigned int i=0; i<W_; i++)
+		for (unsigned int j=0; j<H_; j++)
+			delete indiv_[i*H_+j];
+	delete[] indiv_;
+	Qa_=nullptr;
+	Qb_=nullptr;
+	Qc_=nullptr;
+	F_=nullptr;
+	reproduced_=nullptr;
+	indiv_=nullptr;
+}
 // =========================================================================
 //                              Public Methods
 // =========================================================================
@@ -111,7 +128,7 @@ void Envir::updateFitness(){
 			if (indiv_[x*H_ + y]->getGeno()=='B'){
 				F_[x*H_ + y]=indiv_[x*H_ + y]->getQc();
 			}
-			if (F_[x*H_ + y]<Wmin_)
+			if ((F_[x*H_ + y]<Wmin_)||(reproduced_[x*H_+y]==1))
 				F_[x*H_ + y]=0;
 		}
 }
@@ -120,22 +137,25 @@ void Envir::diffuse(){
 	double* newQa= new double[W_*H_];
 	double* newQb= new double[W_*H_];
 	double* newQc= new double[W_*H_];
-	for (int x=0; x<(int)W_; x++)
+	int m=0, n=0;
+	memcpy(newQa, Qa_, W_*H_*sizeof(double));
+	memcpy(newQb, Qb_, W_*H_*sizeof(double));
+	memcpy(newQc, Qc_, W_*H_*sizeof(double));
+	for (int x=0; x< (int)W_; x++)
 		for (int y=0; y<(int)H_; y++){
-			memcpy(newQa, Qa_, W_*H_);
-			memcpy(newQb, Qb_, W_*H_);
-			memcpy(newQc, Qc_, W_*H_);
-			int m=0, n=0;
 			for (int i=-1; i<=1; i++)
 				for (int j=-1; j<=1; j++){
+					m=0;
+					n=0;
 					if ((x+i)<0)
 						m=i+H_;
 					if ((x+i)>= (int)H_)
 						m=i-H_;
 					if ((y+j)<0)
 						n=j+W_;
-					if ((y+j)>=(int)H_)
+					if ((y+j)>= (int)H_)
 						n=j-W_;
+					//cout<< x*H_+y <<','<< m << ',' << n<< endl;
 					newQa[x*H_+y] += D_*Qa_[(x+m)*H_ +(y+n)];
 					newQb[x*H_+y] += D_*Qb_[(x+m)*H_ +(y+n)];
 					newQc[x*H_+y] += D_*Qc_[(x+m)*H_ +(y+n)];
@@ -144,9 +164,9 @@ void Envir::diffuse(){
 			newQb[x*H_+y]-=9*D_*Qb_[x*H_ + y];
 			newQc[x*H_+y]-=9*D_*Qc_[x*H_ + y];
 		}
-	delete Qa_;
-	delete Qb_;
-	delete Qc_;
+	delete[] Qa_;
+	delete[] Qb_;
+	delete[] Qc_;
 	Qa_=newQa;
 	Qb_=newQb;
 	Qc_=newQc;
@@ -156,6 +176,7 @@ void Envir::plsDie(double prob){
 	for (int x=0; x<(int)W_; x++)
 		for (int y=0; y<(int)H_; y++)
 			if ((double) rand()/RAND_MAX < prob){
+				//cout<< "hi"<<endl;
 				Qa_[x*H_+y] += indiv_[x*H_+y]->getQa();
 				Qb_[x*H_+y] += indiv_[x*H_+y]->getQb();
 				Qc_[x*H_+y] += indiv_[x*H_+y]->getQc();
@@ -182,64 +203,79 @@ void Envir::toSurvive(double prob){
 	int y=0;
 	int m=0;
 	int n=0;
-	double fitmax=-0.001;
+	double fitmax=Wmin_;
 	int memmax;
-	for (int i=0;i<W_;i++)
-		for (int j=0;j<H_;j++){
-			if (indiv_[x*H_+y]->getGeno() == '0'){
-				v.insert(v.end(),x*H_+y);
+	for (unsigned int i=0;i<W_;i++)
+		for (unsigned int j=0;j<H_;j++){
+			cout << indiv_[i*H_+j] -> getGeno() << endl;
+			if (indiv_[i*H_+j]->getGeno() == '0'){
+				v.push_back(i*H_+j);
 			}
 		}
+	std::random_shuffle(v.begin(),v.end());
 	cout<< "Vector contrains:";
 	for (std::vector<int>::iterator i=v.begin();i!=v.end();++i)
 		cout<<' '<< *i;
 	cout<< '\n';
-	std::random_shuffle(v.begin(),v.end());
 	for (std::vector<int>::iterator i=v.begin();i!=v.end();++i){
 		x=*i%H_;
 		y=*i-H_*x;
 		for (int i=-1; i<=1; i++)
 			for (int j=-1; j<=1; j++){
+				m=x+i;
+				n=y+j;
 				if ((x+i)<0)
-					m=i+H_;
+					m+=H_;
 				if ((x+i)>= (int)H_)
-					m=i-H_;
+					m-=H_;
 				if ((y+j)<0)
-					n=j+W_;
+					n+=W_;
 				if ((y+j)>=(int)H_)
-					n=j-W_;
-				if (F_[m*H_+n] > fitmax){
+					n-=W_;
+				cout << m*H_+n <<endl;
+				if ((reproduced_[m*H_+n]==0)/*&&(F_[m*H_+n] > fitmax)*/){
+					cout << "Hi there"<< m*H_+n <<endl;
 					memmax=m*H_+n;
 					fitmax=F_[m*H_+n];
 				}
 			}
-		//mutation
-		mutation(prob, x*H_+y, indiv_[memmax]->getGeno());
-		mutation(prob, memmax, indiv_[memmax]->getGeno());
-		//Division
-		indiv_[memmax]->setQa(indiv_[memmax]->getQa()/2);
-		indiv_[memmax]->setQb(indiv_[memmax]->getQb()/2);
-		indiv_[memmax]->setQc(indiv_[memmax]->getQc()/2);
-		indiv_[x*H_+y]->setQa(indiv_[memmax]->getQa());
-		indiv_[x*H_+y]->setQb(indiv_[memmax]->getQb());	
-		indiv_[x*H_+y]->setQc(indiv_[memmax]->getQc());				
+			//mutation
+		if (fitmax>Wmin_){
+			mutation(prob, x*H_+y, indiv_[memmax]->getGeno());
+			mutation(prob, memmax, indiv_[memmax]->getGeno());
+			//Division
+			indiv_[memmax]->setQa(indiv_[memmax]->getQa()/2);
+			indiv_[memmax]->setQb(indiv_[memmax]->getQb()/2);
+			indiv_[memmax]->setQc(indiv_[memmax]->getQc()/2);
+			indiv_[x*H_+y]->setQa(indiv_[memmax]->getQa());
+			indiv_[x*H_+y]->setQb(indiv_[memmax]->getQb());	
+			indiv_[x*H_+y]->setQc(indiv_[memmax]->getQc());	
+			reproduced_[memmax]=1;
+			reproduced_[x*H_+y]=1;			
+		}
 	}
 }
 
 void Envir::print(){
 	for (unsigned int i=0;i<W_;i++){
 		for (unsigned int j=0;j<H_;j++){
-			cout<< Qa_[i*H_ + j] << '-'<<indiv_[i*H_+j]->getGeno() <<" ";
+			cout<< Qa_[i*H_ + j] << '-'<<indiv_[i*H_+j]->getGeno() <<"-"<< F_[i*H_+j]<<" ";
 		}
 		cout << endl;
 	}
+	cout<<endl;
+}
+void Envir::reinit(){
+	for (unsigned int i=0;i<W_;i++)
+		for (unsigned int j=0;j<H_;j++)
+			reproduced_[i*H_ + j] = 0;
+		
 }
 void Envir::run(int TMAX){
 	for (int t=1; t<=TMAX; t++){
 		updateMetab();
 		plsDie(0.1);
 		toSurvive(0.1);
-		
 	}
 }
 // =========================================================================
