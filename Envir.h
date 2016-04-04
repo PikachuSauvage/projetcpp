@@ -25,6 +25,7 @@ class Envir{
 		double Wmin_;
 		unsigned int W_;
 		unsigned int H_;
+		void mutation(double prob, int posi, char origin);
 	public:
 // =========================================================================
 //                               Constructors
@@ -42,6 +43,9 @@ class Envir{
 		void updateFitness();
 		void diffuse();
 		void plsDie(double prob);
+		void toSurvive(double prob);
+		void print();
+		void run(int TMAX);
 // =========================================================================
 //                                  Getters
 // =========================================================================

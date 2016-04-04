@@ -21,7 +21,7 @@ Envir::Envir(unsigned int W, unsigned int H, double D, double A_homo,
 	Qc_= new double[W*H];
 	F_= new double[W*H];
 	Ecoli** indiv= new Ecoli*[W*H];
-	//unsigned int* reproduced= new unsigned int[W*H];
+	unsigned int* reproduced= new unsigned int[W*H];
 	cout.precision(3);
 	for (unsigned int i=0;i<W;i++){
 		for (unsigned int j=0;j<H;j++){
@@ -30,13 +30,13 @@ Envir::Envir(unsigned int W, unsigned int H, double D, double A_homo,
 			Qb_[i*H + j] = 0;
 			Qc_[i*H + j] = 0;
 			F_[i*H + j] =0;
-			//reproduced[i*H + j] = 0;
+			reproduced[i*H + j] = 0;
 			indiv[i*H + j]=nullptr;
 		}
 		cout << endl;
 	}
 	D_=D;
-	//reproduced_=reproduced;
+	reproduced_=reproduced;
 	indiv_=indiv;
 	W_=W;
 	H_=H;
@@ -54,7 +54,7 @@ Envir::Envir(unsigned int W, unsigned int H, double D, double A_homo,
 //                              Public Methods
 // =========================================================================
 void Envir::init(int W, int H, double percentageGA){
-	char* tmpTable= new char [W*H];
+	char* tmpTable= new char[W*H];
 	int x=0,y=0;
 	int count=0;
 	for (int i=0; i<W; i++)
@@ -63,18 +63,18 @@ void Envir::init(int W, int H, double percentageGA){
 	while (count < (W * H * percentageGA)){
 		x=rand()%W;
 		y=rand()%H;
+		//cout << x <<','<< y << endl;
 		if (tmpTable[x*H + y] == '0'){
-			Ecoli thisecoli=Ecoli(x,y,'A');
-			indiv_[x*H + y]= &thisecoli;
+			indiv_[x*H + y]= new Ecoli(x,y,'A');
+			tmpTable[x*H + y] ='A';
 			count++;
 		}
 	}
 	for (int i=0; i<W; i++)
 		for (int j=0; j<W; j++)
-			if (tmpTable[i*H + j] == '0'){
-				Ecoli thisecoli=Ecoli(x,y,'B');
-				indiv_[i*H + j] = &thisecoli;
-			}
+			if (tmpTable[i*H + j] == '0')
+				indiv_[i*H + j] = new Ecoli(x,y,'B');
+	delete[] tmpTable;
 }
 
 void Envir::updateMetab(){
@@ -83,6 +83,7 @@ void Envir::updateMetab(){
 	double curr_qc = 0;
 	for (unsigned int x=0; x<W_; x++)
 		for (unsigned int y=0; y<H_; y++){
+			//cout<< x << y <<endl;
 			curr_qa = indiv_[x*H_ + y]->getQa();
 			curr_qb = indiv_[x*H_ + y]->getQb();
 			curr_qc = indiv_[x*H_ + y]->getQc();
@@ -162,17 +163,30 @@ void Envir::plsDie(double prob){
 				indiv_[x*H_+y]->setQa(0);
 				indiv_[x*H_+y]->setQb(0);
 				indiv_[x*H_+y]->setQc(0);
+				F_[x*H_+y]=0;
 			}
 }
-void Envir::toSurvive(){
-	vector<int> v;
+void Envir::mutation(double prob, int posi, char origin){
+	if ((double) random()/RAND_MAX <= prob){
+		if (origin=='A'){
+			indiv_[posi]->setGeno('B');
+		} else {
+			indiv_[posi]->setGeno('A');
+		}
+	}
+}
+		
+void Envir::toSurvive(double prob){
+	std::vector<int> v;
 	int x=0;
 	int y=0;
+	int m=0;
+	int n=0;
 	double fitmax=-0.001;
 	int memmax;
 	for (int i=0;i<W_;i++)
 		for (int j=0;j<H_;j++){
-			if (indiv_[x*H_+y].getGeno() == '0'){
+			if (indiv_[x*H_+y]->getGeno() == '0'){
 				v.insert(v.end(),x*H_+y);
 			}
 		}
@@ -199,19 +213,10 @@ void Envir::toSurvive(){
 					fitmax=F_[m*H_+n];
 				}
 			}
-		if (indiv_[memmax]->getGeno()=='A'){
-			if ((double)random()/RAND_MAX >= proba){
-				indiv_[x*H_+y]->setGeno('A');
-			} else {
-				indiv_[x*H_+y]->setGeno('B');
-			}
-		} else {
-			if ((double)random()/RAND_MAX >= proba){
-				indiv_[x*H_+y]->setGeno('B');
-			} else {
-				indiv_[x*H_+y]->setGeno('A');
-			}
-		}
+		//mutation
+		mutation(prob, x*H_+y, indiv_[memmax]->getGeno());
+		mutation(prob, memmax, indiv_[memmax]->getGeno());
+		//Division
 		indiv_[memmax]->setQa(indiv_[memmax]->getQa()/2);
 		indiv_[memmax]->setQb(indiv_[memmax]->getQb()/2);
 		indiv_[memmax]->setQc(indiv_[memmax]->getQc()/2);
@@ -220,10 +225,21 @@ void Envir::toSurvive(){
 		indiv_[x*H_+y]->setQc(indiv_[memmax]->getQc());				
 	}
 }
+
+void Envir::print(){
+	for (unsigned int i=0;i<W_;i++){
+		for (unsigned int j=0;j<H_;j++){
+			cout<< Qa_[i*H_ + j] << '-'<<indiv_[i*H_+j]->getGeno() <<" ";
+		}
+		cout << endl;
+	}
+}
 void Envir::run(int TMAX){
 	for (int t=1; t<=TMAX; t++){
 		updateMetab();
-		plsDie();
+		plsDie(0.1);
+		toSurvive(0.1);
+		
 	}
 }
 // =========================================================================
