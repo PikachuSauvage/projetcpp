@@ -28,14 +28,14 @@ Envir::Envir(unsigned int W, unsigned int H, double D, double A_homo,
 	for (unsigned int i=0;i<W;i++){
 		for (unsigned int j=0;j<H;j++){
 			Qa_[i*H + j] = A_homo;
-			cout<< Qa_[i*H + j] <<" ";
+			//cout<< Qa_[i*H + j] <<" ";
 			Qb_[i*H + j] = 0;
 			Qc_[i*H + j] = 0;
 			F_[i*H + j] =0;
 			reproduced_[i*H + j] = 0;
 			indiv[i*H + j]=nullptr;
 		}
-		cout << endl;
+		//cout << endl;
 	}
 	D_=D;
 	indiv_=indiv;
@@ -94,29 +94,52 @@ void Envir::init(int W, int H, double percentageGA){
 	delete[] tmpTable;
 }
 
-void Envir::updateMetab(){
+void Envir::updateMetab(double p, double n){
 	double curr_qa = 0;
 	double curr_qb = 0;
 	double curr_qc = 0;
+	double Qmoving = 0;
 	for (unsigned int x=0; x<W_; x++)
 		for (unsigned int y=0; y<H_; y++){
-			//cout<< x << y <<endl;
-			curr_qa = indiv_[x*H_ + y]->getQa();
-			curr_qb = indiv_[x*H_ + y]->getQb();
-			curr_qc = indiv_[x*H_ + y]->getQc();
-			if (indiv_[x*H_ + y]->getGeno()=='A'){
-				Qa_[x*H_ +y] = Qa_[x*H_ + y]*(1-RAA_);//dAout
-				indiv_[x*H_ + y]->setQa(curr_qa+RAA_*Qa_[x*H_ +y]
-				-curr_qa*RAB_); //dA
-				indiv_[x*H_ + y]->setQb(curr_qb*(1+RAB_));//dB
-			}
-			if (indiv_[x*H_ + y]->getGeno()=='B'){
-				Qb_[x*H_ +y] = Qb_[x*H_ + y]*(1-RBB_);//dBout
-				indiv_[x*H_ + y]->setQb(curr_qb+RBB_*Qb_[x*H_ + y]
-				-curr_qb*RBC_);//dB
-				indiv_[x*H_ + y]->setQc(curr_qc*(1+RBC_));//dC
-			}
+			////cout<< x << y <<endl;
+			//curr_qa = indiv_[x*H_ + y]->getQa();
+			//curr_qb = indiv_[x*H_ + y]->getQb();
+			//curr_qc = indiv_[x*H_ + y]->getQc();
+			//if (indiv_[x*H_ + y]->getGeno()=='A'){
+				//Qmoving = Qa_[x*H_ + y]*RAA_;
+				//Qa_[x*H_ +y] -= Qmoving;//dAout
+				//indiv_[x*H_ + y]->setQa((curr_qa+Qmoving)*(1-RAB_)); //dA
+				//indiv_[x*H_ + y]->setQb(curr_qb+(curr_qa+Qmoving)*RAB_);//dB
+			//}
+			//if (indiv_[x*H_ + y]->getGeno()=='B'){
+				//Qmoving = Qb_[x*H_ + y]*RBB_;
+				//Qb_[x*H_ +y] -= Qmoving;//dBout
+				//indiv_[x*H_ + y]->setQb((curr_qb+Qmoving)*(1-RBB_));//dB
+				//indiv_[x*H_ + y]->setQc(curr_qc+(curr_qb+Qmoving)*RBC_);//dC
+			//}
+			////cout<< indiv_[x*H_ +y]->getQa() <<" "<< indiv_[x*H_ +y]->getQb()
+			//// <<" "<< indiv_[x*H_ +y]->getQc()<<endl;
+			if (reproduced_[x*H_ + y]==0){
+				if (indiv_[x*H_ + y]->getGeno()=='A'){
+					for (int i=0; i< (int)(n/p); i++){
+						indiv_[x*H_ + y]->setQb(indiv_[x*H_ + y]->getQb()
+						+indiv_[x*H_ + y]->getQa()* RAB_ * p);
+						indiv_[x*H_ + y]->setQa(indiv_[x*H_ + y]->getQa()
+						+(Qa_[x*H_ + y]*RAA_-indiv_[x*H_ + y]->getQa()*RAB_)*p);
+						Qa_[x*H_+y]-=Qa_[x*H_+y]*RAA_*p;
+					}
+				}
+				if (indiv_[x*H_ + y]->getGeno()=='B'){
+					for (int i=0; i< (int)(n/p); i++){
+						indiv_[x*H_ + y]->setQc(indiv_[x*H_ + y]->getQc()
+						+indiv_[x*H_ + y]->getQb()*RBC_*p);
+						indiv_[x*H_ + y]->setQb(indiv_[x*H_ + y]->getQb()
+						+(Qb_[x*H_ + y]*RBB_-indiv_[x*H_ + y]->getQb()*RBC_)*p);
+						Qb_[x*H_+y]-=Qb_[x*H_+y]*RBB_*p;
+					}
+				}
 		}
+}
 }
 
 void Envir::updateFitness(){
@@ -187,9 +210,10 @@ void Envir::plsDie(double prob){
 				F_[x*H_+y]=0;
 			}
 }
-void Envir::mutation(double prob, int posi, char origin){
+void Envir::mutation(double prob, int posi){
 	if ((double) random()/RAND_MAX <= prob){
-		if (origin=='A'){
+		//cout << "Congrats, your PIKACHU evolved into RAICHU" << endl;
+		if (indiv_[posi]->getGeno()=='A'){
 			indiv_[posi]->setGeno('B');
 		} else {
 			indiv_[posi]->setGeno('A');
@@ -207,7 +231,6 @@ void Envir::toSurvive(double prob){
 	int memmax;
 	for (unsigned int i=0;i<W_;i++)
 		for (unsigned int j=0;j<H_;j++){
-			cout << indiv_[i*H_+j] -> getGeno() << endl;
 			if (indiv_[i*H_+j]->getGeno() == '0'){
 				v.push_back(i*H_+j);
 			}
@@ -218,8 +241,9 @@ void Envir::toSurvive(double prob){
 		cout<<' '<< *i;
 	cout<< '\n';
 	for (std::vector<int>::iterator i=v.begin();i!=v.end();++i){
-		x=*i%H_;
+		x=*i/H_;
 		y=*i-H_*x;
+		//cout << "*i="<<*i<< ",X=:" << x <<",Y=:"<<y<<endl;
 		for (int i=-1; i<=1; i++)
 			for (int j=-1; j<=1; j++){
 				m=x+i;
@@ -232,17 +256,19 @@ void Envir::toSurvive(double prob){
 					n+=W_;
 				if ((y+j)>=(int)H_)
 					n-=W_;
-				cout << m*H_+n <<endl;
-				if ((reproduced_[m*H_+n]==0)/*&&(F_[m*H_+n] > fitmax)*/){
-					cout << "Hi there"<< m*H_+n <<endl;
+				//cout << m*H_+n <<"hi" <<endl;
+				if ((reproduced_[m*H_+n]==0)&&(F_[m*H_+n] > fitmax)){
+					//cout << "Mother No:"<< m*H_+n <<endl;
 					memmax=m*H_+n;
 					fitmax=F_[m*H_+n];
 				}
 			}
 			//mutation
+		//cout << "yo yo" << endl;
 		if (fitmax>Wmin_){
-			mutation(prob, x*H_+y, indiv_[memmax]->getGeno());
-			mutation(prob, memmax, indiv_[memmax]->getGeno());
+			//cout << "check now" <<endl;
+			mutation(prob, x*H_+y);
+			mutation(prob, memmax);
 			//Division
 			indiv_[memmax]->setQa(indiv_[memmax]->getQa()/2);
 			indiv_[memmax]->setQb(indiv_[memmax]->getQb()/2);
@@ -250,32 +276,61 @@ void Envir::toSurvive(double prob){
 			indiv_[x*H_+y]->setQa(indiv_[memmax]->getQa());
 			indiv_[x*H_+y]->setQb(indiv_[memmax]->getQb());	
 			indiv_[x*H_+y]->setQc(indiv_[memmax]->getQc());	
+			indiv_[x*H_+y]->setGeno(indiv_[memmax]->getGeno());
 			reproduced_[memmax]=1;
-			reproduced_[x*H_+y]=1;			
+			reproduced_[x*H_+y]=1;
 		}
 	}
 }
 
 void Envir::print(){
+	int A=0;
+	int B=0;
+	double somme=0;
 	for (unsigned int i=0;i<W_;i++){
 		for (unsigned int j=0;j<H_;j++){
-			cout<< Qa_[i*H_ + j] << '-'<<indiv_[i*H_+j]->getGeno() <<"-"<< F_[i*H_+j]<<" ";
+			cout<<"No:" << i*H_+j <<
+			" Geno: "<<indiv_[i*H_+j]->getGeno() <<
+			//" Fit: "<<F_[i*H_+j]<<
+			" QaEn: " <<Qa_[i*H_ + j] <<
+			" QbEn: " <<Qb_[i*H_ + j] <<
+			" QcEn: " <<Qc_[i*H_ + j] <<
+			" QaIn: " <<indiv_[i*H_+j]->getQa()<<
+			" QbIn: " <<indiv_[i*H_+j]->getQb()<<
+			" QcIn: " <<indiv_[i*H_+j]->getQc()<<
+			" rp " <<reproduced_[i*H_ + j]<<endl;
+			somme=somme+Qa_[i*H_ + j]+Qb_[i*H_ + j]+Qc_[i*H_ + j];
+			somme=somme+indiv_[i*H_+j]->getQa()+indiv_[i*H_+j]->getQb()+indiv_[i*H_+j]->getQc();
+			if (indiv_[i*H_ + j]->getGeno()=='A')
+				A++;
+			else 
+				if (indiv_[i*H_ + j]->getGeno()=='B')
+					B++;
 		}
-		cout << endl;
 	}
-	cout<<endl;
+	cout<<"A: "<< A << " B: " << B << " somme:" << somme <<endl;
 }
+
 void Envir::reinit(){
 	for (unsigned int i=0;i<W_;i++)
 		for (unsigned int j=0;j<H_;j++)
 			reproduced_[i*H_ + j] = 0;
 		
 }
+
+void Envir::refeed(double A){
+	for (unsigned int i=0;i<W_;i++)
+		for (unsigned int j=0;j<H_;j++){
+			Qa_[i*H_ + j] = A;
+			Qb_[i*H_ + j] = 0;
+			Qc_[i*H_ + j] = 0;
+		}
+}
 void Envir::run(int TMAX){
 	for (int t=1; t<=TMAX; t++){
-		updateMetab();
+		updateMetab(0.1, 1);
 		plsDie(0.1);
-		toSurvive(0.1);
+		toSurvive(0);
 	}
 }
 // =========================================================================
