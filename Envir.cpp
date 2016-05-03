@@ -101,24 +101,6 @@ void Envir::updateMetab(double p, double n){
 	double Qmoving = 0;
 	for (unsigned int x=0; x<W_; x++)
 		for (unsigned int y=0; y<H_; y++){
-			////cout<< x << y <<endl;
-			//curr_qa = indiv_[x*H_ + y]->getQa();
-			//curr_qb = indiv_[x*H_ + y]->getQb();
-			//curr_qc = indiv_[x*H_ + y]->getQc();
-			//if (indiv_[x*H_ + y]->getGeno()=='A'){
-				//Qmoving = Qa_[x*H_ + y]*RAA_;
-				//Qa_[x*H_ +y] -= Qmoving;//dAout
-				//indiv_[x*H_ + y]->setQa((curr_qa+Qmoving)*(1-RAB_)); //dA
-				//indiv_[x*H_ + y]->setQb(curr_qb+(curr_qa+Qmoving)*RAB_);//dB
-			//}
-			//if (indiv_[x*H_ + y]->getGeno()=='B'){
-				//Qmoving = Qb_[x*H_ + y]*RBB_;
-				//Qb_[x*H_ +y] -= Qmoving;//dBout
-				//indiv_[x*H_ + y]->setQb((curr_qb+Qmoving)*(1-RBB_));//dB
-				//indiv_[x*H_ + y]->setQc(curr_qc+(curr_qb+Qmoving)*RBC_);//dC
-			//}
-			////cout<< indiv_[x*H_ +y]->getQa() <<" "<< indiv_[x*H_ +y]->getQb()
-			//// <<" "<< indiv_[x*H_ +y]->getQc()<<endl;
 			if (reproduced_[x*H_ + y]==0){
 				if (indiv_[x*H_ + y]->getGeno()=='A'){
 					for (int i=0; i< (int)(n/p); i++){
@@ -236,10 +218,10 @@ void Envir::toSurvive(double prob){
 			}
 		}
 	std::random_shuffle(v.begin(),v.end());
-	cout<< "Vector contrains:";
-	for (std::vector<int>::iterator i=v.begin();i!=v.end();++i)
-		cout<<' '<< *i;
-	cout<< '\n';
+	//cout<< "Vector contrains:";
+	//for (std::vector<int>::iterator i=v.begin();i!=v.end();++i)
+		//cout<<' '<< *i;
+	//cout<< '\n';
 	for (std::vector<int>::iterator i=v.begin();i!=v.end();++i){
 		x=*i/H_;
 		y=*i-H_*x;
