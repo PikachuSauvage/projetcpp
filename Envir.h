@@ -25,7 +25,7 @@ class Envir{
 		double Wmin_;
 		unsigned int W_;
 		unsigned int H_;
-		void mutation(double prob, int posi, char origin);
+		void mutation(double prob, int posi);
 	public:
 // =========================================================================
 //                               Constructors
@@ -39,13 +39,16 @@ class Envir{
 // =========================================================================
 //                              Public Methods
 // =========================================================================
-		void updateMetab();
+		void updateMetab(double p, double n);
 		void updateFitness();
 		void diffuse();
 		void plsDie(double prob);
 		void toSurvive(double prob);
 		void print();
 		void run(int TMAX);
+		void init(int W, int H, double percentageGA);
+		void reinit();
+		void refeed(double A);
 // =========================================================================
 //                                  Getters
 // =========================================================================
@@ -60,7 +63,5 @@ class Envir{
 		void setQa(unsigned int x, unsigned int y, double newValue);
 		void setQb(unsigned int x, unsigned int y, double newValue);
 		void setQc(unsigned int x, unsigned int y, double newValue);
-		void init(int W, int H, double percentageGA);
-		void reinit();
 };
 #endif // ENVIR_H
