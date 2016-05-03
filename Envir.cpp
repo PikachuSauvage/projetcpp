@@ -16,7 +16,7 @@ using std::endl;
 // =========================================================================
 //                               Constructors
 // =========================================================================
-Envir::Envir(unsigned int W, unsigned int H, double D, double A_homo,
+Envir::Envir(unsigned int W, unsigned int H, double D, double Ainit,
 			double RAA, double RAB, double RBB, double RBC, double Wmin){
 	Qa_= new double[W*H];
 	Qb_= new double[W*H];
@@ -27,7 +27,7 @@ Envir::Envir(unsigned int W, unsigned int H, double D, double A_homo,
 	cout.precision(3);
 	for (unsigned int i=0;i<W;i++){
 		for (unsigned int j=0;j<H;j++){
-			Qa_[i*H + j] = A_homo;
+			Qa_[i*H + j] = Ainit;
 			//cout<< Qa_[i*H + j] <<" ";
 			Qb_[i*H + j] = 0;
 			Qc_[i*H + j] = 0;
@@ -46,6 +46,7 @@ Envir::Envir(unsigned int W, unsigned int H, double D, double A_homo,
 	RBB_=RBB;
 	RBC_=RBC;
 	Wmin_=Wmin;
+	status_=-1;
 }
 // ======================================================================
 //                                 Destructor
@@ -160,7 +161,6 @@ void Envir::diffuse(){
 						n=j+W_;
 					if ((y+j)>= (int)H_)
 						n=j-W_;
-					//cout<< x*H_+y <<','<< m << ',' << n<< endl;
 					newQa[x*H_+y] += D_*Qa_[(x+m)*H_ +(y+n)];
 					newQb[x*H_+y] += D_*Qb_[(x+m)*H_ +(y+n)];
 					newQc[x*H_+y] += D_*Qc_[(x+m)*H_ +(y+n)];
@@ -217,6 +217,11 @@ void Envir::toSurvive(double prob){
 				v.push_back(i*H_+j);
 			}
 		}
+	if (v.size()>=W_*H_){
+		//cout << "all dead" <<endl;
+		status_=0;
+		return;
+	}
 	std::random_shuffle(v.begin(),v.end());
 	//cout<< "Vector contrains:";
 	//for (std::vector<int>::iterator i=v.begin();i!=v.end();++i)
@@ -246,9 +251,7 @@ void Envir::toSurvive(double prob){
 				}
 			}
 			//mutation
-		//cout << "yo yo" << endl;
 		if (fitmax>Wmin_){
-			//cout << "check now" <<endl;
 			mutation(prob, x*H_+y);
 			mutation(prob, memmax);
 			//Division
@@ -271,18 +274,18 @@ void Envir::print(){
 	double somme=0;
 	for (unsigned int i=0;i<W_;i++){
 		for (unsigned int j=0;j<H_;j++){
-			cout<<"No:" << i*H_+j <<
-			" Geno: "<<indiv_[i*H_+j]->getGeno() <<
-			//" Fit: "<<F_[i*H_+j]<<
-			" QaEn: " <<Qa_[i*H_ + j] <<
-			" QbEn: " <<Qb_[i*H_ + j] <<
-			" QcEn: " <<Qc_[i*H_ + j] <<
-			" QaIn: " <<indiv_[i*H_+j]->getQa()<<
-			" QbIn: " <<indiv_[i*H_+j]->getQb()<<
-			" QcIn: " <<indiv_[i*H_+j]->getQc()<<
-			" rp " <<reproduced_[i*H_ + j]<<endl;
-			somme=somme+Qa_[i*H_ + j]+Qb_[i*H_ + j]+Qc_[i*H_ + j];
-			somme=somme+indiv_[i*H_+j]->getQa()+indiv_[i*H_+j]->getQb()+indiv_[i*H_+j]->getQc();
+			//cout<<"No:" << i*H_+j <<
+			//" Geno: "<<indiv_[i*H_+j]->getGeno() <<
+			//" QaEn: " <<Qa_[i*H_ + j] <<
+			//" QbEn: " <<Qb_[i*H_ + j] <<
+			//" QcEn: " <<Qc_[i*H_ + j] <<
+			//" QaIn: " <<indiv_[i*H_+j]->getQa()<<
+			//" QbIn: " <<indiv_[i*H_+j]->getQb()<<
+			//" QcIn: " <<indiv_[i*H_+j]->getQc()<<
+			//" rp " <<reproduced_[i*H_ + j]<<endl;
+			//somme=somme+Qa_[i*H_ + j]+Qb_[i*H_ + j]+Qc_[i*H_ + j];
+			//somme=somme+indiv_[i*H_+j]->getQa()+indiv_[i*H_+j]->getQb()+
+			//indiv_[i*H_+j]->getQc();
 			if (indiv_[i*H_ + j]->getGeno()=='A')
 				A++;
 			else 
@@ -290,9 +293,35 @@ void Envir::print(){
 					B++;
 		}
 	}
-	cout<<"A: "<< A << " B: " << B << " somme:" << somme <<endl;
+	cout<<"A: "<< A << " B: " << B <<endl;
 }
 
+void Envir::result(){
+	int A=0;
+	int B=0;
+	for (unsigned int i=0;i<W_;i++){
+		for (unsigned int j=0;j<H_;j++){
+			if (indiv_[i*H_ + j]->getGeno()=='A')
+				A++;
+			else 
+				if (indiv_[i*H_ + j]->getGeno()=='B')
+					B++;
+		}
+	}
+	if ((A==0)&&(B==0)){
+		status_=0;
+		return;
+	}
+	if ((A==0)&&(B!=0)){
+		status_=3;
+		return;
+	}
+	if ((A!=0)&&(B==0)){
+		status_=1;
+		return;
+	}
+	status_=2;
+}
 void Envir::reinit(){
 	for (unsigned int i=0;i<W_;i++)
 		for (unsigned int j=0;j<H_;j++)
@@ -332,6 +361,9 @@ double Envir::getQc(unsigned int x, unsigned int y){
 //}
 Ecoli* Envir::getEcoli(unsigned int x, unsigned int y){
 	return indiv_[x*H_ + y];
+}
+int Envir::getStatus(){
+	return status_;
 }
 
 // =========================================================================

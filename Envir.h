@@ -23,6 +23,7 @@ class Envir{
 		double RBB_;
 		double RBC_;
 		double Wmin_;
+		int status_;
 		unsigned int W_;
 		unsigned int H_;
 		void mutation(double prob, int posi);
@@ -49,12 +50,14 @@ class Envir{
 		void init(int W, int H, double percentageGA);
 		void reinit();
 		void refeed(double A);
+		void result();
 // =========================================================================
 //                                  Getters
 // =========================================================================
 		double getQa(unsigned int x, unsigned int y);
 		double getQb(unsigned int x, unsigned int y);
 		double getQc(unsigned int x, unsigned int y);
+		int getStatus();
 		//unsigned int getRep(unsigned int x, unsigned int y);
 		Ecoli* getEcoli(unsigned int x, unsigned int y);
 // =========================================================================

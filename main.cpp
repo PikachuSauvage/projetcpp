@@ -18,10 +18,12 @@ int main(){
 	cout << "Hello projet C++!" << endl;
 	std::ifstream config;
 	config.open("config.txt",std::ios::in);
+	std::ofstream output;
+	output.open("output.txt",std::ios::out);
 	int W =0;
 	int H =0; 
 	double D=0;
-	double A_homo = 0;
+	double A_percent = 0;
 	double RAA=0;
 	double RAB=0;
 	double RBB=0;
@@ -36,7 +38,7 @@ int main(){
 		std::getline(config, key, '=');
 		config>>D;
 		std::getline(config, key, '=');
-		config>>A_homo;
+		config>>A_percent;
 		std::getline(config, key, '=');
 		config>>RAA;
 		std::getline(config, key, '=');
@@ -48,28 +50,36 @@ int main(){
 		std::getline(config, key, '=');
 		config>>Wmin;
 	}
-	cout<< H << D << A_homo << RAA << RAB << RBB << RBC << Wmin; 
-	Envir test = Envir(W,H,D,A_homo,RAA,RAB,RBB,RBC,Wmin);
-	test.init(W,H,A_homo);
-	test.updateMetab(0.1, 1);
-	for (int T=0; T<=1500 ;T = T+10){
-		for (int A=0; A<=50; A++){
+	//cout<< H << D << A_homo << RAA << RAB << RBB << RBC << Wmin; 
+	for (int T=1; T<=1500 ;T = T+20){
+		for (int A=0; A<=50; A=A+4){
+			cout<<T<< " "<< A <<endl;
+			Envir test = Envir(W,H,D,A,RAA,RAB,RBB,RBC,Wmin);
+			test.init(W,H,A_percent);
+			test.updateMetab(0.1, 1);
 			for (int i=0; i<10000; i++){
 				//cout<< "==========="<< i << "=========="<<endl;
 				test.diffuse();
 				test.updateFitness();
 				test.toSurvive(0);
+				if (test.getStatus()==0)
+					break;
 				test.plsDie(0.02);
 				test.updateMetab(0.1, 1);
 				test.reinit();
 				refeed_count++;
-				if (refeed_count==1300){
+				if (refeed_count==T){
 					refeed_count=0;
-					test.refeed(50);
+					test.refeed(A);
 				}
 			}
+			test.result();
+			output << T << " " << A << " " <<test.getStatus()<<endl;
+			//test.print();
 		}
 	}
-	test.print();
+	config.close();
+	output.close();
+	//test.print();
 	return 0;
 }
