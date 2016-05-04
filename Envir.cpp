@@ -34,7 +34,6 @@ Envir::Envir(unsigned int W, unsigned int H, double D, double Ainit,
 			reproduced_[i*H + j] = 0;
 			indiv[i*H + j]=nullptr;
 		}
-		//cout << endl;
 	}
 	D_=D;
 	indiv_=indiv;

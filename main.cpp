@@ -47,8 +47,8 @@ int main(){
 		std::getline(config, key, '=');
 		config>>Wmin;
 	}
-	for (int T=1; T<=1501;T = T+50){
-		for (int A=0; A<=50; A=A+4){
+	for (int T=700; T<=1000;T = T+10){
+		for (int A=0; A<=50; A=A+1){
 			refeed_count=0;
 			Envir test = Envir(W,H,D,A,RAA,RAB,RBB,RBC,Wmin);
 			test.init(W,H,A_percent);
