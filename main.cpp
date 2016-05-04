@@ -7,9 +7,6 @@
 
 using std::cout;
 using std::endl;
-//using std::cin;
-//void dynamic_param(double tmax, double tmin, double amin, double amax){
-	 
 
 int main(){
 	int refeed_count = 0;
@@ -50,10 +47,9 @@ int main(){
 		std::getline(config, key, '=');
 		config>>Wmin;
 	}
-	//cout<< H << D << A_homo << RAA << RAB << RBB << RBC << Wmin; 
-	for (int T=1; T<=1500 ;T = T+20){
+	for (int T=1; T<=1501;T = T+50){
 		for (int A=0; A<=50; A=A+4){
-			cout<<T<< " "<< A <<endl;
+			refeed_count=0;
 			Envir test = Envir(W,H,D,A,RAA,RAB,RBB,RBC,Wmin);
 			test.init(W,H,A_percent);
 			test.updateMetab(0.1, 1);
@@ -74,12 +70,14 @@ int main(){
 				}
 			}
 			test.result();
+			//if (test.getStatus()== 1)
+			//	test.print();
+			cout << T << " " << A << " " <<test.getStatus()<<endl;
 			output << T << " " << A << " " <<test.getStatus()<<endl;
-			//test.print();
+
 		}
 	}
 	config.close();
 	output.close();
-	//test.print();
 	return 0;
 }
