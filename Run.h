@@ -41,10 +41,10 @@ class Run{
 // =========================================================================
 //                              Public Methods
 // =========================================================================
-		double single_test(int T, int A, double D);
+		double single_test(int T, double A, double D);
 		void dynamic_analyse(std::tuple<int,int,int,int,double,double,
 					double,double,double,int> tupin, std::string s_output);
-		double multip_test(int T, int A, double D, int Rep);
+		double multip_test(int T, double A, double D, int Rep);
 
 // =========================================================================
 //                                  Getters
