@@ -1,9 +1,12 @@
 W=32
 H=32
-D=0.1
 A_percent=0.5
 RAA=0.1
 RAB=0.1
 RBB=0.1
 RBC=0.1
 Wmin=0.001
+Pdie=0.02
+Pmut=0
+odeN=1
+odeStep=0.1

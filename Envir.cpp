@@ -303,18 +303,18 @@ void Envir::result(){
 		}
 	}
 	if ((A==0)&&(B==0)){
-		status_=0;
+		status_=2;
 		return;
 	}
 	if ((A==0)&&(B!=0)){
-		status_=3;
-		return;
-	}
-	if ((A!=0)&&(B==0)){
 		status_=1;
 		return;
 	}
-	status_=2;
+	if ((A!=0)&&(B==0)){
+		status_=0;
+		return;
+	}
+	status_=1;
 }
 void Envir::reinit(){
 	for (unsigned int i=0;i<W_;i++)
@@ -331,13 +331,42 @@ void Envir::refeed(double A){
 			Qc_[i*H_ + j] = 0;
 		}
 }
-void Envir::run(int TMAX){
-	for (int t=1; t<=TMAX; t++){
-		updateMetab(0.1, 1);
-		plsDie(0.1);
-		toSurvive(0);
-	}
-}
+//void Envir::run(int T,A,D){
+	//for (int T=401; T<=500;T = T+1){
+		//for (int A=0; A<=50; A=A+1){
+			//double res=0;
+			//for (int rep=0;rep<10;rep++){
+				//refeed_count=0;
+				//Envir test = Envir(W,H,D,A,RAA,RAB,RBB,RBC,Wmin);
+				//test.init(W,H,A_percent);
+				//test.updateMetab(0.1, 1);
+				//for (int i=0; i<10000; i++){
+					////cout<< "==========="<< i << "=========="<<endl;
+					//test.diffuse();
+					//test.updateFitness();
+					//test.toSurvive(0);
+					//if (test.getStatus()==0)
+						//break;
+					//test.plsDie(0.02);
+					//test.updateMetab(0.1, 1);
+					//test.reinit();
+					//refeed_count++;
+					//if (refeed_count==T){
+						//refeed_count=0;
+						//test.refeed(A);
+					//}
+				//}
+				//test.result();
+				////if (test.getStatus()== 1)
+				////	test.print();
+				//res+=test.getStatus();
+				//cout << T << " " << A << " " <<test.getStatus()<<endl;
+			//}
+			//res=res/10;
+			//output << T << " " << A << " " <<res<<endl;
+		//}
+	//}
+//}
 // =========================================================================
 //                                  Getters
 // =========================================================================
