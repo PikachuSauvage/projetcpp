@@ -16,7 +16,6 @@ class Ecoli{
 		double Qb_;
 		double Qc_;
 		double W_;
-		unsigned int ifLive_;
 	public:
 // =========================================================================
 //                               Constructors

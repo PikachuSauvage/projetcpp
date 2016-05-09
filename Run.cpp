@@ -1,18 +1,14 @@
 #include "Envir.h"
 #include "Run.h"
-#include <cmath>
-#include <cstring>
 #include <iostream>
 using std::cout;
 using std::endl;
-//using std::vector;
-//using std::tuple;
-
 
 Run::Run(std::string s, std::string s_squars){
 	std::ifstream config;
 	config.open(s.c_str(),std::ios::in);
-	squars_.open(s_squars.c_str(),std::ios::out);
+	if (s_squars.size()!=0)
+		squars_.open(s_squars.c_str(),std::ios::out);
 	std::string key;
 	if (config.is_open()){
 		std::getline(config, key, '=');
@@ -35,7 +31,6 @@ Run::Run(std::string s, std::string s_squars){
 		config>>Pdie_;
 		std::getline(config, key, '=');
 		config>>Pmut_;
-		//Pmut_=0.001;
 		std::getline(config, key, '=');
 		config>>odeN_;
 		std::getline(config, key, '=');
@@ -50,9 +45,7 @@ double Run::single_test(int T, double A, double D){
 	int refeed_count=0;
 	Envir test = Envir(W_,H_,D,A,RAA_,RAB_,RBB_,RBC_,Wmin_);
 	test.init(W_,H_,A_percent_);
-	//cout<<W_<< " "<< H_<< " "<< A_percent_<< " "<< odeStep_ << endl;
 	test.updateMetab(odeStep_, odeN_);
-	//test.print();
 	for (int i=0; i<10000; i++){
 		test.diffuse();
 		test.updateFitness();
@@ -69,8 +62,6 @@ double Run::single_test(int T, double A, double D){
 		}
 	}
 	test.result();
-	//if (test.getStatus()==1)
-		//test.print();
 	return test.getStatus();
 }
 
@@ -107,53 +98,55 @@ void Run::dynamic_analyse(std::tuple<int, int ,int ,int,double,double,
 	output<<T2<<" "<<An<<" "<<resMR<<endl;
 	output<<Tn<<" "<<A1<<" "<<resBM<<endl;
 	if ((resTL==resTM)&&(resTM==resML)&&(resML==resMM)){
-		cout<<"Not Det 1:"<<T1<<" "<<Tn<<" "<<An<<" "<<A2<<endl;
+		cout<<"Look, a square!:"<<T1<<" "<<Tn<<" "<<An<<" "<<A2<<endl;
 		squars_<<T1<<" "<< Tn <<" "<< An <<" "<<A2<<" "<< resTL << endl;
 		notDet_.push_back(std::make_tuple(T1,Tn,An,A2));
 	} else {
-		if (toDet_.size()>=max_size_){
-			//cout<<"Terrain pull up"<<endl;
+		if (toDet_.size()>=(unsigned int)max_size_){
 			return;
 		} else {
-			cout<<"Pushing 1:"<<T1<<" "<<Tn<<" "<<An<<" "<<A2<<endl;
+			cout<<"Pushing TL:"<<T1<<" "<<Tn<<" "<<An<<" "<<A2<<endl;
 			toDet_.push_back(std::make_tuple(T1,Tn,An,A2,resTL, resTM, 
 											resML, resMM,D,rep));
 		}
 	}
 	if ((resTM==resTR)&&(resMM==resMR)&&(resTM=resMR)){
-		cout<<"Not Det 2:"<<Tn<<" "<<T2<<" "<<An<<" "<<A2<<endl;
+		cout<<"Look, a square!:"<<Tn<<" "<<T2<<" "<<An<<" "<<A2<<endl;
 		squars_<<Tn<<" "<<T2<<" "<<An<<" "<<A2<<" "<< resTM << endl;
 		notDet_.push_back(std::make_tuple(Tn,T2,An,A2));
 	} else {
-		if (toDet_.size()>=max_size_){
+		if (toDet_.size()>=(unsigned int)max_size_){
 			return;
 		} else {
-			cout<<"Pushing 2:"<<Tn<<" "<<T2<<" "<<An<<" "<<A2<<endl;
-			toDet_.push_back(std::make_tuple(Tn,T2,An,A2,resTM, resTR, resMM, resMR,D,rep));
+			cout<<"Pushing TR:"<<Tn<<" "<<T2<<" "<<An<<" "<<A2<<endl;
+			toDet_.push_back(std::make_tuple(Tn,T2,An,A2,resTM, resTR, 
+			resMM, resMR,D,rep));
 		}
 	}
 	if ((resML==resMM)&&(resBL==resBM)&&(resML==resBM)){
-		cout<<"Not Det 3:"<<T1<<" "<<Tn<<" "<<A1<<" "<<An<<endl;
+		cout<<"Look, a square!:"<<T1<<" "<<Tn<<" "<<A1<<" "<<An<<endl;
 		squars_<<T1<<" "<<Tn<<" "<<A1<<" "<<An<< " "<< resML<< endl;
 		notDet_.push_back(std::make_tuple(T1,Tn,A1,An));
 	} else {
-		if (toDet_.size()>=max_size_){
+		if (toDet_.size()>=(unsigned int)max_size_){
 			return;
 		} else {
-			cout<<"Pushing 3:"<<T1<<" "<<Tn<<" "<<A1<<" "<<An<<endl;
-			toDet_.push_back(std::make_tuple(T1,Tn,A1,An,resML,resMM,resBL,resBM,D,rep));
+			cout<<"Pushing BL:"<<T1<<" "<<Tn<<" "<<A1<<" "<<An<<endl;
+			toDet_.push_back(std::make_tuple(T1,Tn,A1,An,resML,resMM,
+			resBL,resBM,D,rep));
 		}
 	}
 	if ((resMM==resMR)&&(resBM==resBR)&&(resMM==resBR)){
-		cout<<"Not Det 4:"<<Tn<<" "<<T2<<" "<<A1<<" "<<An<<endl;
+		cout<<"Look, a square!:"<<Tn<<" "<<T2<<" "<<A1<<" "<<An<<endl;
 		squars_<<Tn<<" "<<T2<<" "<<A1<<" "<<An<<" "<<resMM<<endl;
 		notDet_.push_back(std::make_tuple(Tn,T2,A1,An));
 	} else {
-		if (toDet_.size()>=max_size_){
+		if (toDet_.size()>=(unsigned int)max_size_){
 			return;
 		} else {
-			cout<<"Pushing 4:"<<Tn<<" "<<T2<<" "<<A1<<" "<<An<<endl;
-			toDet_.push_back(std::make_tuple(Tn,T2,A1,An,resMM,resMR,resBM,resBR,D,rep));
+			cout<<"Pushing BR:"<<Tn<<" "<<T2<<" "<<A1<<" "<<An<<endl;
+			toDet_.push_back(std::make_tuple(Tn,T2,A1,An,resMM,resMR,
+			resBM,resBR,D,rep));
 		}
 	}
 	output.close();
@@ -162,12 +155,10 @@ void Run::dynamic_analyse(std::tuple<int, int ,int ,int,double,double,
 double Run::multip_test(int T, double A, double D, int Rep){
 	double curr_res=0;
 	double res=0;
-	//cout<<"da wang jiao wo lai xun shan: "<<T<<" "<<A<<endl;
 	for (int i=0; i<Rep; i++){
 		curr_res=single_test(T,A,D);
 		res+=curr_res;
 	}
 	res=res/Rep;
-	//cout<<res<<endl;
 	return res;
 }

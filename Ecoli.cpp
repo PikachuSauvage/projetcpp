@@ -21,7 +21,6 @@ Ecoli::Ecoli(unsigned int x, unsigned int y, char c){
 	Qb_=0;
 	Qc_=0;
 	W_=0;
-	ifLive_=1;
 }
 // ===========================================================================
 //                                 Destructor

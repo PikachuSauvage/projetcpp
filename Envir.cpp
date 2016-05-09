@@ -24,7 +24,7 @@ Envir::Envir(unsigned int W, unsigned int H, double D, double Ainit,
 	F_= new double[W*H];
 	Ecoli** indiv= new Ecoli*[W*H];
 	reproduced_= new unsigned int[W*H];
-	cout.precision(3);
+	//cout.precision(3);
 	for (unsigned int i=0;i<W;i++){
 		for (unsigned int j=0;j<H;j++){
 			Qa_[i*H + j] = Ainit;
@@ -79,7 +79,6 @@ void Envir::init(int W, int H, double percentageGA){
 	while (count < (W * H * percentageGA)){
 		x=rand()%W;
 		y=rand()%H;
-		//cout << x <<','<< y << endl;
 		if (tmpTable[x*H + y] == '0'){
 			indiv_[x*H + y]= new Ecoli(x,y,'A');
 			tmpTable[x*H + y] ='A';
@@ -206,10 +205,6 @@ void Envir::toSurvive(double prob){
 		return;
 	}
 	std::random_shuffle(v.begin(),v.end());
-	//cout<< "Vector contrains:";
-	//for (std::vector<int>::iterator i=v.begin();i!=v.end();++i)
-		//cout<<' '<< *i;
-	//cout<< '\n';
 	for (std::vector<int>::iterator i=v.begin();i!=v.end();++i){
 		std::vector<int> memmax;
 		fitmax=0;
@@ -227,7 +222,6 @@ void Envir::toSurvive(double prob){
 					n+=W_;
 				if ((y+j)>=(int)H_)
 					n-=W_;
-				//cout << m*H_+n <<"hi" <<endl;
 				if (reproduced_[m*H_+n]==0){
 					if (F_[m*H_+n] >fitmax){
 						memmax.clear();
@@ -242,7 +236,6 @@ void Envir::toSurvive(double prob){
 			//mutation
 		std::random_shuffle(memmax.begin(),memmax.end());
 		if (fitmax>0){
-			//cout << fitmax << Wmin_ << endl;
 			mutation(prob, x*H_+y);
 			mutation(prob, memmax[0]);
 			//Division
@@ -331,42 +324,6 @@ void Envir::refeed(double A){
 			Qc_[i*H_ + j] = 0;
 		}
 }
-//void Envir::run(int T,A,D){
-	//for (int T=401; T<=500;T = T+1){
-		//for (int A=0; A<=50; A=A+1){
-			//double res=0;
-			//for (int rep=0;rep<10;rep++){
-				//refeed_count=0;
-				//Envir test = Envir(W,H,D,A,RAA,RAB,RBB,RBC,Wmin);
-				//test.init(W,H,A_percent);
-				//test.updateMetab(0.1, 1);
-				//for (int i=0; i<10000; i++){
-					////cout<< "==========="<< i << "=========="<<endl;
-					//test.diffuse();
-					//test.updateFitness();
-					//test.toSurvive(0);
-					//if (test.getStatus()==0)
-						//break;
-					//test.plsDie(0.02);
-					//test.updateMetab(0.1, 1);
-					//test.reinit();
-					//refeed_count++;
-					//if (refeed_count==T){
-						//refeed_count=0;
-						//test.refeed(A);
-					//}
-				//}
-				//test.result();
-				////if (test.getStatus()== 1)
-				////	test.print();
-				//res+=test.getStatus();
-				//cout << T << " " << A << " " <<test.getStatus()<<endl;
-			//}
-			//res=res/10;
-			//output << T << " " << A << " " <<res<<endl;
-		//}
-	//}
-//}
 // =========================================================================
 //                                  Getters
 // =========================================================================
@@ -379,9 +336,6 @@ double Envir::getQb(unsigned int x, unsigned int y){
 double Envir::getQc(unsigned int x, unsigned int y){
 	return Qc_[x*H_ + y];
 }
-//unsigned int Envir::getRep(unsigned int x, unsigned int y){
-	//return reproduced_[x*H_ + y];
-//}
 Ecoli* Envir::getEcoli(unsigned int x, unsigned int y){
 	return indiv_[x*H_ + y];
 }

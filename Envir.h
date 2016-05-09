@@ -5,7 +5,6 @@
 #define ENVIR_H
 
 #include "Ecoli.h"
-//#include "vector"
 class Envir{
 // =========================================================================
 //                              Protected Methods
@@ -46,7 +45,6 @@ class Envir{
 		void plsDie(double prob);
 		void toSurvive(double prob);
 		void print();
-		//void run(int TMAX);
 		void init(int W, int H, double percentageGA);
 		void reinit();
 		void refeed(double A);
@@ -58,7 +56,6 @@ class Envir{
 		double getQb(unsigned int x, unsigned int y);
 		double getQc(unsigned int x, unsigned int y);
 		int getStatus();
-		//unsigned int getRep(unsigned int x, unsigned int y);
 		Ecoli* getEcoli(unsigned int x, unsigned int y);
 // =========================================================================
 //                                  Setters
